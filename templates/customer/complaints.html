@@ -1,0 +1,61 @@
+{% extends "customer/_base.html" %}
+{% import "partials/icons.html" as icon %}
+{% block title %}Complaints{% endblock %}
+{% block active_page %}complaints{% endblock %}
+
+{% block content %}
+<div class="page-header">
+  <div>
+    <h1>Complaints</h1>
+    <p>Raise a ticket for meter faults, billing errors, or anything else.</p>
+  </div>
+</div>
+
+<div class="card card-pad mb-4">
+  <h3 class="mb-3">Raise a New Complaint</h3>
+  <form method="POST" action="{{ url_for('portal.complaints') }}">
+    <div class="form-row">
+      <div class="form-group" style="flex:0 0 200px;">
+        <label>Category</label>
+        <select class="form-control" name="category">
+          {% for c in categories %}<option value="{{ c }}">{{ c }}</option>{% endfor %}
+        </select>
+      </div>
+      <div class="form-group" style="flex:1;">
+        <label>Describe the issue</label>
+        <input class="form-control" name="description" placeholder="Tell us what's wrong..." required>
+      </div>
+    </div>
+    <button class="btn btn-primary">{{ icon.send() }} Submit Complaint</button>
+  </form>
+</div>
+
+<div class="card">
+  <div class="card-header"><h3>My Complaint History</h3></div>
+  <div class="table-wrap">
+    <table class="data-table">
+      <thead><tr><th>Category</th><th>Description</th><th>Status</th><th>Created</th><th>Resolution</th></tr></thead>
+      <tbody>
+        {% for c in complaints %}
+        <tr>
+          <td><span class="badge badge-info">{{ c.category }}</span></td>
+          <td>{{ c.description }}</td>
+          <td>
+            {% if c.status == 'Resolved' or c.status == 'Closed' %}<span class="badge badge-success">{{ c.status }}</span>
+            {% elif c.status == 'In Progress' %}<span class="badge badge-warning">{{ c.status }}</span>
+            {% else %}<span class="badge badge-danger">{{ c.status }}</span>{% endif %}
+          </td>
+          <td class="cell-muted">{{ c.created_at[:16] }}</td>
+          <td class="cell-muted">{{ c.resolution_note or '-' }}</td>
+        </tr>
+        {% else %}
+        <tr><td colspan="5" class="table-empty">
+          {{ icon.wrench() }}
+          <div>You haven't raised any complaints yet.</div>
+        </td></tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</div>
+{% endblock %}

@@ -1,0 +1,33 @@
+{% extends "admin/_base.html" %}
+{% import "partials/icons.html" as icon %}
+{% block title %}Audit Log{% endblock %}
+{% block active_page %}audit{% endblock %}
+
+{% block content %}
+<div class="page-header">
+  <div>
+    <h1>Audit Log</h1>
+    <p>Every significant admin action, timestamped. Showing the most recent 500.</p>
+  </div>
+</div>
+
+<div class="card">
+  <div class="table-wrap">
+    <table class="data-table">
+      <thead><tr><th>Timestamp</th><th>User</th><th>Action</th><th>Details</th></tr></thead>
+      <tbody>
+        {% for log in logs %}
+        <tr>
+          <td class="cell-muted font-mono text-xs">{{ log.timestamp[:19] }}</td>
+          <td class="cell-strong">{{ log.username or '-' }}</td>
+          <td><span class="badge badge-info">{{ log.action }}</span></td>
+          <td class="cell-muted">{{ log.details or '' }}</td>
+        </tr>
+        {% else %}
+        <tr><td colspan="4" class="table-empty">No activity logged yet.</td></tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</div>
+{% endblock %}

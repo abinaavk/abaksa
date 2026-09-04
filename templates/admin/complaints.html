@@ -1,0 +1,56 @@
+{% extends "admin/_base.html" %}
+{% import "partials/icons.html" as icon %}
+{% block title %}Complaints{% endblock %}
+{% block active_page %}complaints{% endblock %}
+
+{% block content %}
+<div class="page-header">
+  <div>
+    <h1>Complaints / Tickets</h1>
+    <p>{{ complaints|length }} ticket(s)</p>
+  </div>
+</div>
+
+<form method="GET" class="filter-bar">
+  <select class="form-control" name="status" style="max-width:180px;" onchange="this.form.submit()">
+    <option value="All" {{ 'selected' if status == 'All' }}>All Statuses</option>
+    {% for s in statuses %}<option value="{{ s }}" {{ 'selected' if status == s }}>{{ s }}</option>{% endfor %}
+  </select>
+</form>
+
+<div class="grid" style="grid-template-columns: 1fr;">
+  {% for c in complaints %}
+  <div class="card card-pad">
+    <div class="flex items-center justify-between flex-wrap gap-2 mb-2">
+      <div class="flex items-center gap-3">
+        <span class="badge badge-info">{{ c.category }}</span>
+        {% if c.status == 'Resolved' or c.status == 'Closed' %}<span class="badge badge-success">{{ c.status }}</span>
+        {% elif c.status == 'In Progress' %}<span class="badge badge-warning">{{ c.status }}</span>
+        {% else %}<span class="badge badge-danger">{{ c.status }}</span>{% endif %}
+      </div>
+      <span class="text-xs text-muted">{{ c.created_at[:16] }}</span>
+    </div>
+    <div class="font-bold mb-1">{{ c.customer_name }} ({{ c.consumer_no }})</div>
+    <p class="text-sm text-soft mb-3">{{ c.description }}</p>
+    {% if c.resolution_note %}
+    <div class="text-xs" style="background:var(--surface-alt);padding:8px 12px;border-radius:8px;margin-bottom:12px;">
+      <strong>Resolution note:</strong> {{ c.resolution_note }}
+    </div>
+    {% endif %}
+
+    <form method="POST" action="{{ url_for('admin.update_complaint', complaint_id=c.id) }}" class="flex gap-2 flex-wrap items-center">
+      <select class="form-control" name="status" style="max-width:160px;">
+        {% for s in statuses %}<option value="{{ s }}" {{ 'selected' if c.status == s }}>{{ s }}</option>{% endfor %}
+      </select>
+      <input class="form-control" name="note" placeholder="Resolution note (optional)" style="max-width:320px;" value="{{ c.resolution_note or '' }}">
+      <button class="btn btn-primary btn-sm">Update</button>
+    </form>
+  </div>
+  {% else %}
+  <div class="card card-pad table-empty">
+    {{ icon.wrench() }}
+    <div>No complaints match this filter.</div>
+  </div>
+  {% endfor %}
+</div>
+{% endblock %}

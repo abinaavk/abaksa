@@ -1,0 +1,66 @@
+{% extends "admin/_base.html" %}
+{% import "partials/icons.html" as icon %}
+{% block title %}{{ customer.name }}{% endblock %}
+{% block active_page %}customers{% endblock %}
+
+{% block content %}
+<div class="page-header">
+  <div>
+    <h1>{{ customer.name }}</h1>
+    <p>{{ customer.consumer_no }} &middot; {{ customer.connection_type }} &middot; {{ customer.meter_no }}</p>
+  </div>
+  <div class="page-header-actions">
+    <a href="{{ url_for('admin.customers') }}" class="btn btn-outline">&larr; Back to Customers</a>
+  </div>
+</div>
+
+<div class="grid grid-2 mb-4">
+  <div class="card card-pad">
+    <h3 class="mb-3">Bill History</h3>
+    <div class="table-wrap">
+      <table class="data-table">
+        <thead><tr><th>Bill No</th><th>Date</th><th>Units</th><th>Amount</th><th>Status</th></tr></thead>
+        <tbody>
+          {% for b in bills %}
+          <tr>
+            <td><a href="{{ url_for('admin.bill_detail', bill_id=b.id) }}" class="cell-strong" style="color:var(--primary);">{{ b.bill_no }}</a></td>
+            <td class="cell-muted">{{ b.bill_date }}</td>
+            <td>{{ "%.1f"|format(b.units_consumed) }}</td>
+            <td class="font-bold">₹{{ "{:,.2f}".format(b.total_amount) }}</td>
+            <td>
+              {% if b.status == 'Paid' %}<span class="badge badge-success">Paid</span>
+              {% elif b.status == 'Overdue' %}<span class="badge badge-danger">Overdue</span>
+              {% else %}<span class="badge badge-warning">Unpaid</span>{% endif %}
+            </td>
+          </tr>
+          {% else %}
+          <tr><td colspan="5" class="table-empty">No bills yet.</td></tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <div class="card card-pad">
+    <h3 class="mb-3">Meter Reading History</h3>
+    <div class="table-wrap">
+      <table class="data-table">
+        <thead><tr><th>Date</th><th>Previous</th><th>Current</th><th>Units</th><th>Billed</th></tr></thead>
+        <tbody>
+          {% for r in readings %}
+          <tr>
+            <td class="cell-muted">{{ r.reading_date }}</td>
+            <td>{{ r.previous_units }}</td>
+            <td>{{ r.current_units }}</td>
+            <td class="font-bold">{{ r.units_consumed }}</td>
+            <td>{% if r.billed %}<span class="badge badge-success">Yes</span>{% else %}<span class="badge badge-muted">No</span>{% endif %}</td>
+          </tr>
+          {% else %}
+          <tr><td colspan="5" class="table-empty">No readings yet.</td></tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>
+{% endblock %}

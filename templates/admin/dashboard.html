@@ -1,0 +1,98 @@
+{% extends "admin/_base.html" %}
+{% import "partials/icons.html" as icon %}
+{% block title %}Dashboard{% endblock %}
+{% block active_page %}dashboard{% endblock %}
+
+{% block content %}
+<div class="page-header">
+  <div>
+    <h1>Dashboard</h1>
+    <p>Overview of your utility's customers, revenue and activity.</p>
+  </div>
+  <div class="page-header-actions">
+    <a href="{{ url_for('admin.billing') }}" class="btn btn-primary">{{ icon.receipt() }} Go to Billing</a>
+  </div>
+</div>
+
+<div class="grid grid-5 mb-4">
+  <div class="stat-card">
+    <div class="stat-icon icon-tone-primary">{{ icon.users() }}</div>
+    <div class="stat-value">{{ summary.n_customers }}</div>
+    <div class="stat-label">Active Customers</div>
+  </div>
+  <div class="stat-card">
+    <div class="stat-icon icon-tone-success">{{ icon.card() }}</div>
+    <div class="stat-value">₹{{ "{:,.0f}".format(summary.month_revenue) }}</div>
+    <div class="stat-label">Revenue This Month</div>
+  </div>
+  <div class="stat-card">
+    <div class="stat-icon icon-tone-warning">{{ icon.clock() }}</div>
+    <div class="stat-value">₹{{ "{:,.0f}".format(summary.pending_dues) }}</div>
+    <div class="stat-label">Pending Dues</div>
+  </div>
+  <div class="stat-card">
+    <div class="stat-icon icon-tone-danger">{{ icon.alerttriangle() }}</div>
+    <div class="stat-value">{{ summary.overdue_count }}</div>
+    <div class="stat-label">Overdue Bills</div>
+  </div>
+  <div class="stat-card">
+    <div class="stat-icon icon-tone-info">{{ icon.wrench() }}</div>
+    <div class="stat-value">{{ summary.open_complaints }}</div>
+    <div class="stat-label">Open Complaints</div>
+  </div>
+</div>
+
+<div class="grid grid-2 mb-4">
+  <div class="card">
+    <div class="card-header"><h3>Consumption Trend</h3><span class="text-xs text-muted">Last 8 months</span></div>
+    <div class="card-body">
+      <div class="chart-box">
+        <canvas data-chart="line" data-chart-json="trend-data"></canvas>
+      </div>
+      <script type="application/json" id="trend-data">
+        {
+          "labels": [{% for t in trend %}{{ t.ym|tojson }}{% if not loop.last %},{% endif %}{% endfor %}],
+          "values": [{% for t in trend %}{{ t.units or 0 }}{% if not loop.last %},{% endif %}{% endfor %}],
+          "label": "Units (kWh)"
+        }
+      </script>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="card-header"><h3>Revenue by Connection Type</h3></div>
+    <div class="card-body">
+      <div class="chart-box">
+        <canvas data-chart="bar" data-chart-json="revenue-data"></canvas>
+      </div>
+      <script type="application/json" id="revenue-data">
+        {
+          "labels": [{% for r in revenue %}{{ r.connection_type|tojson }}{% if not loop.last %},{% endif %}{% endfor %}],
+          "values": [{% for r in revenue %}{{ r.revenue or 0 }}{% if not loop.last %},{% endif %}{% endfor %}],
+          "label": "Revenue"
+        }
+      </script>
+    </div>
+  </div>
+</div>
+
+<div class="card">
+  <div class="card-header"><h3>Top Consumers</h3></div>
+  <div class="table-wrap">
+    <table class="data-table">
+      <thead><tr><th>Customer</th><th>Consumer No</th><th>Total Units (kWh)</th></tr></thead>
+      <tbody>
+        {% for c in summary.top_consumers %}
+        <tr>
+          <td class="cell-strong">{{ c.name }}</td>
+          <td class="cell-muted">{{ c.consumer_no }}</td>
+          <td>{{ "%.2f"|format(c.total_units or 0) }}</td>
+        </tr>
+        {% else %}
+        <tr><td colspan="3" class="table-empty">No billing data yet.</td></tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</div>
+{% endblock %}

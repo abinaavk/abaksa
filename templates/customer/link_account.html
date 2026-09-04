@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <title>Link Your Account - {{ app_name }}</title>
+  {% include "partials/head.html" %}
+</head>
+<body>
+{% import "partials/icons.html" as icon %}
+<div class="auth-shell">
+  <div class="auth-panel" style="flex:1;">
+    <div class="auth-form-wrap">
+      <div class="auth-toggle-theme">
+        <div class="theme-toggle" data-theme-toggle>
+          <div class="switch-track"><div class="switch-thumb">{{ icon.sun() }}</div></div>
+        </div>
+      </div>
+
+      <div class="stat-icon icon-tone-primary mb-3" style="width:48px;height:48px;">{{ icon.zap() }}</div>
+      <h1>One last step</h1>
+      <p class="auth-sub">You're signed in with Google as <strong>{{ current_user.full_name }}</strong>. Enter your consumer number to connect your billing account.</p>
+
+      <form method="POST" action="{{ url_for('portal.link_account') }}">
+        <div class="form-group">
+          <label for="consumer_no">Consumer Number</label>
+          <input class="form-control" type="text" id="consumer_no" name="consumer_no" value="{{ consumer_no }}" placeholder="e.g. C-1001" required autofocus>
+        </div>
+        <button type="submit" class="btn btn-primary btn-block btn-lg">Link My Account</button>
+      </form>
+
+      <p class="auth-footer-link"><a href="{{ url_for('public.logout') }}">Log out instead</a></p>
+    </div>
+  </div>
+</div>
+
+{% include "partials/toasts.html" %}
+<script src="{{ url_for('static', filename='js/app.js') }}"></script>
+</body>
+</html>

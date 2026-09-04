@@ -1,0 +1,38 @@
+{% extends "customer/_base.html" %}
+{% import "partials/icons.html" as icon %}
+{% block title %}My Profile{% endblock %}
+{% block active_page %}profile{% endblock %}
+
+{% block content %}
+<div class="page-header">
+  <div>
+    <h1>My Profile</h1>
+    <p>Your account and connection details.</p>
+  </div>
+</div>
+
+<div class="grid grid-2">
+  <div class="card card-pad">
+    <h3 class="mb-3">Account Details</h3>
+    <div class="info-row"><span class="info-label">Name</span><span class="info-value">{{ customer.name }}</span></div>
+    <div class="info-row"><span class="info-label">Consumer Number</span><span class="info-value">{{ customer.consumer_no }}</span></div>
+    <div class="info-row"><span class="info-label">Meter Number</span><span class="info-value">{{ customer.meter_no }}</span></div>
+    <div class="info-row"><span class="info-label">Connection Type</span><span class="info-value">{{ customer.connection_type }}</span></div>
+    <div class="info-row"><span class="info-label">Sanctioned Load</span><span class="info-value">{{ customer.sanctioned_load or '-' }}</span></div>
+    <div class="info-row"><span class="info-label">Address</span><span class="info-value">{{ customer.address }}</span></div>
+    <div class="info-row"><span class="info-label">Phone</span><span class="info-value">{{ customer.phone or '-' }}</span></div>
+    <div class="info-row"><span class="info-label">Email</span><span class="info-value">{{ customer.email or '-' }}</span></div>
+    <div class="info-row"><span class="info-label">Connected Since</span><span class="info-value">{{ customer.connection_date }}</span></div>
+    <p class="text-xs text-muted mt-3">To update your address, phone or email, please contact your utility's admin team.</p>
+  </div>
+
+  <div class="card card-pad">
+    <h3 class="mb-3">Change Password</h3>
+    <form method="POST" action="{{ url_for('portal.profile') }}">
+      <div class="form-group"><label>New Password</label><input class="form-control" type="password" name="new_password" required></div>
+      <div class="form-group"><label>Confirm New Password</label><input class="form-control" type="password" name="confirm_password" required></div>
+      <button class="btn btn-primary">{{ icon.lock() }} Update Password</button>
+    </form>
+  </div>
+</div>
+{% endblock %}

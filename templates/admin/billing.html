@@ -1,0 +1,66 @@
+{% extends "admin/_base.html" %}
+{% import "partials/icons.html" as icon %}
+{% block title %}Billing{% endblock %}
+{% block active_page %}billing{% endblock %}
+
+{% block content %}
+<div class="page-header">
+  <div>
+    <h1>Billing</h1>
+    <p>{{ bills|length }} bill(s) found</p>
+  </div>
+  <div class="page-header-actions">
+    <form method="POST" action="{{ url_for('admin.recompute_fines') }}">
+      <button class="btn btn-outline">{{ icon.refresh() }} Update Overdue Fines</button>
+    </form>
+    <form method="POST" action="{{ url_for('admin.bulk_generate') }}" data-confirm="Generate bills for every unbilled meter reading?">
+      <button class="btn btn-success">{{ icon.bolt() }} Bulk Generate All Bills</button>
+    </form>
+  </div>
+</div>
+
+<form method="GET" class="filter-bar">
+  <select class="form-control" name="status" style="max-width:160px;" onchange="this.form.submit()">
+    <option value="All" {{ 'selected' if status == 'All' }}>All Statuses</option>
+    {% for s in statuses %}<option value="{{ s }}" {{ 'selected' if status == s }}>{{ s }}</option>{% endfor %}
+  </select>
+  <select class="form-control" name="type" style="max-width:160px;" onchange="this.form.submit()">
+    <option value="All" {{ 'selected' if ctype == 'All' }}>All Types</option>
+    {% for t in connection_types %}<option value="{{ t }}" {{ 'selected' if ctype == t }}>{{ t }}</option>{% endfor %}
+  </select>
+  <input class="form-control" type="date" name="from" value="{{ date_from }}" style="max-width:160px;">
+  <input class="form-control" type="date" name="to" value="{{ date_to }}" style="max-width:160px;">
+  <button type="submit" class="btn btn-outline">Filter</button>
+</form>
+
+<div class="card">
+  <div class="table-wrap">
+    <table class="data-table">
+      <thead><tr><th>Bill No</th><th>Customer</th><th>Type</th><th>Date</th><th>Units</th><th>Amount</th><th>Status</th><th></th></tr></thead>
+      <tbody>
+        {% for b in bills %}
+        <tr>
+          <td class="cell-strong">{{ b.bill_no }} {% if b.is_anomalous %}<span title="Unusually high usage">{{ icon.alerttriangle() }}</span>{% endif %}</td>
+          <td>{{ b.customer_name }}</td>
+          <td><span class="badge badge-info">{{ b.connection_type }}</span></td>
+          <td class="cell-muted">{{ b.bill_date }}</td>
+          <td>{{ "%.1f"|format(b.units_consumed) }}</td>
+          <td class="font-bold">₹{{ "{:,.2f}".format(b.total_amount) }}</td>
+          <td>
+            {% if b.status == 'Paid' %}<span class="badge badge-success">Paid</span>
+            {% elif b.status == 'Overdue' %}<span class="badge badge-danger">Overdue</span>
+            {% else %}<span class="badge badge-warning">Unpaid</span>{% endif %}
+          </td>
+          <td><a href="{{ url_for('admin.bill_detail', bill_id=b.id) }}" class="btn btn-sm btn-outline">Open</a></td>
+        </tr>
+        {% else %}
+        <tr><td colspan="8" class="table-empty">
+          {{ icon.receipt() }}
+          <div>No bills match these filters.</div>
+        </td></tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</div>
+{% endblock %}

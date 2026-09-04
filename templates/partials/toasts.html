@@ -1,0 +1,17 @@
+{# toasts.html
+   Turns Flask's flash messages into a small JSON blob that app.js reads
+   and turns into actual toast popups. We do it this way (JSON + JS)
+   instead of rendering styled divs directly so the toasts can animate in
+   and auto-dismiss with plain JavaScript. #}
+{% with messages = get_flashed_messages(with_categories=true) %}
+{% if messages %}
+<script type="application/json" id="flash-data">
+[
+  {% for category, text in messages %}
+  {"category": {{ category|tojson }}, "text": {{ text|tojson }}}{% if not loop.last %},{% endif %}
+  {% endfor %}
+]
+</script>
+{% endif %}
+{% endwith %}
+<div class="toast-container"></div>

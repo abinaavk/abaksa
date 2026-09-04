@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<!-- {% block active_page %}{% endblock %} -->
+<html lang="en">
+<head>
+  <title>{% block title %}Dashboard{% endblock %} - {{ app_name }}</title>
+  {% include "partials/head.html" %}
+</head>
+<body>
+  {% set active_page = self.active_page() %}
+  <div class="app-shell">
+    {% include "partials/portal_sidebar.html" %}
+
+    <div class="main-area">
+      {% set page_title = self.title() %}
+      {% include "partials/topbar.html" %}
+
+      <main class="content">
+        {% block content %}{% endblock %}
+      </main>
+    </div>
+  </div>
+
+  {% include "partials/toasts.html" %}
+
+  <script src="{{ url_for('static', filename='js/vendor/chart.min.js') }}"></script>
+  <script src="{{ url_for('static', filename='js/app.js') }}"></script>
+  <script src="{{ url_for('static', filename='js/charts.js') }}"></script>
+  {% block extra_js %}{% endblock %}
+</body>
+</html>

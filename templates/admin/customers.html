@@ -1,0 +1,140 @@
+{% extends "admin/_base.html" %}
+{% import "partials/icons.html" as icon %}
+{% block title %}Customers{% endblock %}
+{% block active_page %}customers{% endblock %}
+
+{% block content %}
+<div class="page-header">
+  <div>
+    <h1>Customers</h1>
+    <p>{{ customers|length }} customer(s) found</p>
+  </div>
+  <div class="page-header-actions">
+    <button class="btn btn-primary" data-modal-open="modal-add-customer">{{ icon.plus() }} Add Customer</button>
+  </div>
+</div>
+
+<form method="GET" class="filter-bar">
+  <div class="search-box">
+    {{ icon.search() }}
+    <input class="form-control" type="text" name="q" value="{{ search }}" placeholder="Search name, consumer no, meter no, address...">
+  </div>
+  <select class="form-control" name="type" style="max-width:180px;" onchange="this.form.submit()">
+    <option value="All" {{ 'selected' if ctype == 'All' }}>All Types</option>
+    {% for t in connection_types %}
+    <option value="{{ t }}" {{ 'selected' if ctype == t }}>{{ t }}</option>
+    {% endfor %}
+  </select>
+  <button type="submit" class="btn btn-outline">Filter</button>
+</form>
+
+<div class="card">
+  <div class="table-wrap">
+    <table class="data-table">
+      <thead>
+        <tr>
+          <th>Consumer No</th><th>Name</th><th>Type</th><th>Meter No</th>
+          <th>Phone</th><th>Email</th><th>Address</th><th></th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for c in customers %}
+        <tr>
+          <td class="cell-strong">{{ c.consumer_no }}</td>
+          <td>{{ c.name }}</td>
+          <td><span class="badge badge-info">{{ c.connection_type }}</span></td>
+          <td class="cell-muted">{{ c.meter_no }}</td>
+          <td class="cell-muted">{{ c.phone or '-' }}</td>
+          <td class="cell-muted">{{ c.email or '-' }}</td>
+          <td class="cell-muted">{{ c.address }}</td>
+          <td>
+            <div class="row-actions">
+              <a href="{{ url_for('admin.customer_history', customer_id=c.id) }}" class="icon-btn btn-sm" title="Bill history">{{ icon.eye() }}</a>
+              <button class="icon-btn btn-sm" title="Edit" data-modal-open="modal-edit-{{ c.id }}">{{ icon.edit() }}</button>
+              <form method="POST" action="{{ url_for('admin.delete_customer', customer_id=c.id) }}" data-confirm="Delete {{ c.name }}? This also removes their readings and bills.">
+                <button class="icon-btn btn-sm" style="color:var(--danger);" title="Delete">{{ icon.trash() }}</button>
+              </form>
+            </div>
+          </td>
+        </tr>
+        {% else %}
+        <tr><td colspan="8" class="table-empty">
+          {{ icon.users() }}
+          <div>No customers found. Add your first customer to get started.</div>
+        </td></tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</div>
+
+<!-- Add Customer Modal -->
+<div class="modal-overlay" id="modal-add-customer">
+  <div class="modal">
+    <div class="modal-header"><h3>Add Customer</h3><button class="modal-close" data-modal-close>{{ icon.x() }}</button></div>
+    <form method="POST" action="{{ url_for('admin.add_customer') }}">
+      <div class="modal-body">
+        <div class="form-row">
+          <div class="form-group"><label>Consumer Number</label><input class="form-control" name="consumer_no" required></div>
+          <div class="form-group"><label>Meter Number</label><input class="form-control" name="meter_no" required></div>
+        </div>
+        <div class="form-group"><label>Full Name</label><input class="form-control" name="name" required></div>
+        <div class="form-group"><label>Address</label><input class="form-control" name="address" required></div>
+        <div class="form-row">
+          <div class="form-group"><label>Phone</label><input class="form-control" name="phone"></div>
+          <div class="form-group"><label>Email</label><input class="form-control" type="email" name="email"></div>
+        </div>
+        <div class="form-row">
+          <div class="form-group">
+            <label>Connection Type</label>
+            <select class="form-control" name="connection_type">
+              {% for t in connection_types %}<option value="{{ t }}">{{ t }}</option>{% endfor %}
+            </select>
+          </div>
+          <div class="form-group"><label>Sanctioned Load</label><input class="form-control" name="sanctioned_load" placeholder="e.g. 5kW"></div>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-outline" data-modal-close>Cancel</button>
+        <button type="submit" class="btn btn-primary">Save Customer</button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<!-- Edit Customer Modals (one per row) -->
+{% for c in customers %}
+<div class="modal-overlay" id="modal-edit-{{ c.id }}">
+  <div class="modal">
+    <div class="modal-header"><h3>Edit {{ c.name }}</h3><button class="modal-close" data-modal-close>{{ icon.x() }}</button></div>
+    <form method="POST" action="{{ url_for('admin.edit_customer', customer_id=c.id) }}">
+      <div class="modal-body">
+        <div class="form-row">
+          <div class="form-group"><label>Consumer Number</label><input class="form-control" value="{{ c.consumer_no }}" disabled></div>
+          <div class="form-group"><label>Meter Number</label><input class="form-control" value="{{ c.meter_no }}" disabled></div>
+        </div>
+        <div class="form-group"><label>Full Name</label><input class="form-control" name="name" value="{{ c.name }}" required></div>
+        <div class="form-group"><label>Address</label><input class="form-control" name="address" value="{{ c.address }}" required></div>
+        <div class="form-row">
+          <div class="form-group"><label>Phone</label><input class="form-control" name="phone" value="{{ c.phone or '' }}"></div>
+          <div class="form-group"><label>Email</label><input class="form-control" type="email" name="email" value="{{ c.email or '' }}"></div>
+        </div>
+        <div class="form-row">
+          <div class="form-group">
+            <label>Connection Type</label>
+            <select class="form-control" name="connection_type">
+              {% for t in connection_types %}<option value="{{ t }}" {{ 'selected' if c.connection_type == t }}>{{ t }}</option>{% endfor %}
+            </select>
+          </div>
+          <div class="form-group"><label>Sanctioned Load</label><input class="form-control" name="sanctioned_load" value="{{ c.sanctioned_load or '' }}"></div>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-outline" data-modal-close>Cancel</button>
+        <button type="submit" class="btn btn-primary">Save Changes</button>
+      </div>
+    </form>
+  </div>
+</div>
+{% endfor %}
+{% endblock %}

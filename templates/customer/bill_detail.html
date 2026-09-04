@@ -1,0 +1,73 @@
+{% extends "customer/_base.html" %}
+{% import "partials/icons.html" as icon %}
+{% block title %}{{ bill.bill_no }}{% endblock %}
+{% block active_page %}bills{% endblock %}
+
+{% block content %}
+<div class="page-header">
+  <div>
+    <h1>{{ bill.bill_no }}</h1>
+    <p>Issued {{ bill.bill_date }}</p>
+  </div>
+  <div class="page-header-actions">
+    <a href="{{ url_for('portal.bills') }}" class="btn btn-outline">&larr; Back to My Bills</a>
+  </div>
+</div>
+
+<div class="grid grid-2">
+  <div class="card card-pad">
+    <div class="flex items-center justify-between mb-3">
+      <h3>Billing Summary</h3>
+      {% if bill.status == 'Paid' %}<span class="badge badge-success">Paid</span>
+      {% elif bill.status == 'Overdue' %}<span class="badge badge-danger">Overdue</span>
+      {% else %}<span class="badge badge-warning">Unpaid</span>{% endif %}
+    </div>
+
+    <div class="info-row"><span class="info-label">Due Date</span><span class="info-value">{{ bill.due_date }}</span></div>
+    <div class="info-row"><span class="info-label">Units Consumed</span><span class="info-value">{{ "%.2f"|format(bill.units_consumed) }} kWh</span></div>
+    <div class="info-row"><span class="info-label">Energy Charge</span><span class="info-value">₹{{ "{:,.2f}".format(bill.energy_charge) }}</span></div>
+    <div class="info-row"><span class="info-label">Fixed Charge</span><span class="info-value">₹{{ "{:,.2f}".format(bill.fixed_charge) }}</span></div>
+    <div class="info-row"><span class="info-label">Surcharge</span><span class="info-value">₹{{ "{:,.2f}".format(bill.surcharge) }}</span></div>
+    <div class="info-row"><span class="info-label">Tax</span><span class="info-value">₹{{ "{:,.2f}".format(bill.tax) }}</span></div>
+    {% if bill.subsidy %}<div class="info-row"><span class="info-label">Subsidy</span><span class="info-value text-success">- ₹{{ "{:,.2f}".format(bill.subsidy) }}</span></div>{% endif %}
+    {% if bill.late_fine %}<div class="info-row"><span class="info-label">Late Fine</span><span class="info-value text-danger">₹{{ "{:,.2f}".format(bill.late_fine) }}</span></div>{% endif %}
+    <div class="info-row" style="border-top:2px solid var(--border);margin-top:6px;padding-top:14px;">
+      <span class="info-label font-bold" style="color:var(--text);">Total Amount</span>
+      <span class="info-value" style="font-size:18px;color:var(--primary);">₹{{ "{:,.2f}".format(bill.total_amount) }}</span>
+    </div>
+
+    <div class="flex gap-2 mt-4 flex-wrap">
+      <a href="{{ url_for('portal.bill_pdf', bill_id=bill.id) }}" target="_blank" class="btn btn-outline">{{ icon.download() }} Download PDF</a>
+      {% if customer.email %}
+      <form method="POST" action="{{ url_for('portal.bill_email', bill_id=bill.id) }}">
+        <button class="btn btn-outline">{{ icon.send() }} Email Me a Copy</button>
+      </form>
+      {% endif %}
+      {% if bill.status != 'Paid' %}
+      <form method="POST" action="{{ url_for('portal.bill_pay', bill_id=bill.id) }}">
+        <button class="btn btn-primary">{{ icon.card() }} Pay Now (UPI)</button>
+      </form>
+      {% endif %}
+    </div>
+  </div>
+
+  <div class="card card-pad">
+    <h3 class="mb-3">Slab-wise Breakdown</h3>
+    <div class="table-wrap">
+      <table class="data-table">
+        <thead><tr><th>Slab (units)</th><th>Units Billed</th><th>Rate</th><th>Amount</th></tr></thead>
+        <tbody>
+          {% for slab in breakdown %}
+          <tr>
+            <td>{{ "%.0f"|format(slab.from) }} - {{ "%.0f"|format(slab.to) }}</td>
+            <td>{{ "%.2f"|format(slab.units) }}</td>
+            <td>₹{{ "%.2f"|format(slab.rate) }}</td>
+            <td class="font-bold">₹{{ "%.2f"|format(slab.amount) }}</td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>
+{% endblock %}

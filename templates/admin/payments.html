@@ -1,0 +1,38 @@
+{% extends "admin/_base.html" %}
+{% import "partials/icons.html" as icon %}
+{% block title %}Payments{% endblock %}
+{% block active_page %}payments{% endblock %}
+
+{% block content %}
+<div class="page-header">
+  <div>
+    <h1>Payments</h1>
+    <p>{{ payments|length }} payment(s) recorded</p>
+  </div>
+</div>
+
+<div class="card">
+  <div class="table-wrap">
+    <table class="data-table">
+      <thead><tr><th>Bill No</th><th>Customer</th><th>Amount</th><th>Date</th><th>Method</th><th>Reference</th></tr></thead>
+      <tbody>
+        {% for p in payments %}
+        <tr>
+          <td class="cell-strong">{{ p.bill_no }}</td>
+          <td>{{ p.customer_name }}</td>
+          <td class="font-bold">₹{{ "{:,.2f}".format(p.amount_paid) }}</td>
+          <td class="cell-muted">{{ p.payment_date[:19] }}</td>
+          <td><span class="badge badge-info">{{ p.method }}</span></td>
+          <td class="cell-muted">{{ p.reference_no or '-' }}</td>
+        </tr>
+        {% else %}
+        <tr><td colspan="6" class="table-empty">
+          {{ icon.card() }}
+          <div>No payments recorded yet.</div>
+        </td></tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</div>
+{% endblock %}

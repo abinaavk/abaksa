@@ -1,0 +1,52 @@
+{% extends "customer/_base.html" %}
+{% import "partials/icons.html" as icon %}
+{% block title %}My Bills{% endblock %}
+{% block active_page %}bills{% endblock %}
+
+{% block content %}
+<div class="page-header">
+  <div>
+    <h1>My Bills</h1>
+    <p>{{ bills|length }} bill(s)</p>
+  </div>
+</div>
+
+<form method="GET" class="filter-bar">
+  <select class="form-control" name="status" style="max-width:180px;" onchange="this.form.submit()">
+    <option value="All" {{ 'selected' if status == 'All' }}>All Statuses</option>
+    <option value="Paid" {{ 'selected' if status == 'Paid' }}>Paid</option>
+    <option value="Unpaid" {{ 'selected' if status == 'Unpaid' }}>Unpaid</option>
+    <option value="Overdue" {{ 'selected' if status == 'Overdue' }}>Overdue</option>
+  </select>
+</form>
+
+<div class="card">
+  <div class="table-wrap">
+    <table class="data-table">
+      <thead><tr><th>Bill No</th><th>Date</th><th>Units</th><th>Amount</th><th>Status</th><th>Due Date</th><th></th></tr></thead>
+      <tbody>
+        {% for b in bills %}
+        <tr>
+          <td class="cell-strong">{{ b.bill_no }}</td>
+          <td class="cell-muted">{{ b.bill_date }}</td>
+          <td>{{ "%.1f"|format(b.units_consumed) }}</td>
+          <td class="font-bold">₹{{ "{:,.2f}".format(b.total_amount) }}</td>
+          <td>
+            {% if b.status == 'Paid' %}<span class="badge badge-success">Paid</span>
+            {% elif b.status == 'Overdue' %}<span class="badge badge-danger">Overdue</span>
+            {% else %}<span class="badge badge-warning">Unpaid</span>{% endif %}
+          </td>
+          <td class="cell-muted">{{ b.due_date }}</td>
+          <td><a href="{{ url_for('portal.bill_detail', bill_id=b.id) }}" class="btn btn-sm btn-outline">Open</a></td>
+        </tr>
+        {% else %}
+        <tr><td colspan="7" class="table-empty">
+          {{ icon.receipt() }}
+          <div>No bills yet.</div>
+        </td></tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</div>
+{% endblock %}

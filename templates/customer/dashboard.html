@@ -1,0 +1,68 @@
+{% extends "customer/_base.html" %}
+{% import "partials/icons.html" as icon %}
+{% block title %}My Dashboard{% endblock %}
+{% block active_page %}dashboard{% endblock %}
+
+{% block content %}
+<div class="page-header">
+  <div>
+    <h1>Welcome back, {{ customer.name.split(' ')[0] }}</h1>
+    <p>Consumer No: {{ customer.consumer_no }} &middot; {{ customer.connection_type }} connection</p>
+  </div>
+</div>
+
+<div class="grid grid-3 mb-4">
+  <div class="stat-card">
+    <div class="stat-icon icon-tone-primary">{{ icon.receipt() }}</div>
+    <div class="stat-value">{{ bills|length }}</div>
+    <div class="stat-label">Total Bills</div>
+  </div>
+  <div class="stat-card">
+    <div class="stat-icon icon-tone-warning">{{ icon.clock() }}</div>
+    <div class="stat-value">₹{{ "{:,.2f}".format(total_due) }}</div>
+    <div class="stat-label">Outstanding Due</div>
+  </div>
+  <div class="stat-card">
+    <div class="stat-icon icon-tone-info">{{ icon.zap() }}</div>
+    <div class="stat-value">{{ "%.1f"|format(last_reading.current_units) if last_reading else '-' }} kWh</div>
+    <div class="stat-label">Last Meter Reading</div>
+  </div>
+</div>
+
+<div class="card card-pad mb-4">
+  <h3 class="mb-3">Most Recent Bill</h3>
+  {% if latest_bill %}
+  <div class="flex items-center justify-between flex-wrap gap-3">
+    <div>
+      <div class="font-bold">{{ latest_bill.bill_no }}</div>
+      <div class="text-sm text-muted">{{ latest_bill.bill_date }} &middot; {{ "%.1f"|format(latest_bill.units_consumed) }} kWh</div>
+    </div>
+    <div class="flex items-center gap-3">
+      {% if latest_bill.status == 'Paid' %}<span class="badge badge-success">Paid</span>
+      {% elif latest_bill.status == 'Overdue' %}<span class="badge badge-danger">Overdue</span>
+      {% else %}<span class="badge badge-warning">Unpaid</span>{% endif %}
+      <span class="font-bold" style="font-size:16px;">₹{{ "{:,.2f}".format(latest_bill.total_amount) }}</span>
+      <a href="{{ url_for('portal.bill_detail', bill_id=latest_bill.id) }}" class="btn btn-primary btn-sm">View Details</a>
+    </div>
+  </div>
+  {% else %}
+  <p class="text-muted">No bills generated yet.</p>
+  {% endif %}
+</div>
+
+<div class="card">
+  <div class="card-header"><h3>My Consumption Trend</h3></div>
+  <div class="card-body">
+    <div class="chart-box">
+      <canvas data-chart="line" data-chart-json="my-trend-data"></canvas>
+    </div>
+    <script type="application/json" id="my-trend-data">
+      {
+        "labels": [{% for t in trend %}{{ t.ym|tojson }}{% if not loop.last %},{% endif %}{% endfor %}],
+        "values": [{% for t in trend %}{{ t.units or 0 }}{% if not loop.last %},{% endif %}{% endfor %}],
+        "label": "Units (kWh)"
+      }
+    </script>
+  </div>
+</div>
+{% endblock %}

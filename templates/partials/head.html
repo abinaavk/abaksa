@@ -1,0 +1,8 @@
+{# head.html - shared <head> tag content, included by every base layout #}
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+<meta name="description" content="{{ app_name }} - {{ app_tagline }}">
+<link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 24 24%22><rect width=%2224%22 height=%2224%22 rx=%226%22 fill=%22%235b6ee1%22/><path d=%22M13 4 5 14h6l-1 6 8-11h-6z%22 fill=%22white%22/></svg>">
+<link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+{# theme.js loads early and applies the saved theme before first paint, so there's no flash of the wrong colors #}
+<script src="{{ url_for('static', filename='js/theme.js') }}"></script>

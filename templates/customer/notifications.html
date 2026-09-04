@@ -1,0 +1,40 @@
+{% extends "customer/_base.html" %}
+{% import "partials/icons.html" as icon %}
+{% block title %}Notifications{% endblock %}
+{% block active_page %}notifications{% endblock %}
+
+{% block content %}
+<div class="page-header">
+  <div>
+    <h1>Notifications</h1>
+    <p>Bill alerts, payment confirmations, and messages from your utility.</p>
+  </div>
+  <div class="page-header-actions">
+    <form method="POST" action="{{ url_for('portal.mark_all_notifications_read') }}">
+      <button class="btn btn-outline">Mark all as read</button>
+    </form>
+  </div>
+</div>
+
+<div class="card">
+  <div style="padding:8px 22px 22px;">
+    {% for n in notifications %}
+    <div class="flex items-start gap-3" style="padding:14px 0;border-bottom:1px solid var(--border);">
+      <div class="stat-icon icon-tone-primary" style="width:34px;height:34px;flex-shrink:0;">{{ icon.bell() }}</div>
+      <div style="flex:1;">
+        <div class="font-bold text-sm">{{ n.title }}</div>
+        <div class="text-sm text-muted">{{ n.message }}</div>
+        <div class="text-xs text-muted mt-1">{{ n.created_at[:16] }}</div>
+      </div>
+      {% if not n.is_read %}
+      <form method="POST" action="{{ url_for('portal.mark_notification_read', notif_id=n.id) }}">
+        <button class="btn btn-sm btn-ghost">Mark read</button>
+      </form>
+      {% endif %}
+    </div>
+    {% else %}
+    <div class="table-empty">{{ icon.bell() }}<div>No notifications yet.</div></div>
+    {% endfor %}
+  </div>
+</div>
+{% endblock %}

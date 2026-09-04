@@ -1,0 +1,43 @@
+{% import "partials/icons.html" as icon %}
+<aside class="sidebar">
+  <div class="sidebar-brand">
+    <div class="brand-mark">{{ icon.bolt() }}</div>
+    <div class="brand-text">
+      <strong>{{ app_name }}</strong>
+      <span>Customer Portal</span>
+    </div>
+  </div>
+
+  <nav class="sidebar-scroll">
+    <div class="sidebar-section-label">My Account</div>
+    <a class="nav-item {{ 'active' if active_page == 'dashboard' }}" href="{{ url_for('portal.dashboard') }}">{{ icon.home() }}<span>Dashboard</span></a>
+    <a class="nav-item {{ 'active' if active_page == 'bills' }}" href="{{ url_for('portal.bills') }}">{{ icon.receipt() }}<span>My Bills</span></a>
+    <a class="nav-item {{ 'active' if active_page == 'readings' }}" href="{{ url_for('portal.readings') }}">{{ icon.zap() }}<span>Consumption History</span></a>
+    <a class="nav-item {{ 'active' if active_page == 'complaints' }}" href="{{ url_for('portal.complaints') }}">{{ icon.wrench() }}<span>Complaints</span></a>
+    <a class="nav-item {{ 'active' if active_page == 'notifications' }}" href="{{ url_for('portal.notifications') }}">
+      {{ icon.bell() }}<span>Notifications</span>
+      {% if unread_notification_count %}<span class="nav-badge">{{ unread_notification_count }}</span>{% endif %}
+    </a>
+    <a class="nav-item {{ 'active' if active_page == 'profile' }}" href="{{ url_for('portal.profile') }}">{{ icon.user() }}<span>My Profile</span></a>
+  </nav>
+
+  <div class="sidebar-footer">
+    <div class="flex items-center gap-3 mb-3">
+      <div class="avatar">
+        {% if current_user.avatar_url %}<img src="{{ current_user.avatar_url }}" alt="">{% else %}{{ current_user.full_name[0]|upper }}{% endif %}
+      </div>
+      <div style="min-width:0;">
+        <div class="text-sm font-bold" style="overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">{{ current_user.full_name }}</div>
+        <div class="text-xs text-muted">{{ current_user.username }}</div>
+      </div>
+    </div>
+    <div class="flex items-center justify-between">
+      <div class="theme-toggle" data-theme-toggle>
+        <div class="switch-track"><div class="switch-thumb">{{ icon.sun() }}</div></div>
+        <span>Dark mode</span>
+      </div>
+      <a href="{{ url_for('public.logout') }}" class="icon-btn" title="Log out">{{ icon.logout() }}</a>
+    </div>
+  </div>
+</aside>
+<div class="sidebar-backdrop"></div>

@@ -1,0 +1,60 @@
+{% extends "admin/_base.html" %}
+{% import "partials/icons.html" as icon %}
+{% block title %}Reports & Analytics{% endblock %}
+{% block active_page %}reports{% endblock %}
+
+{% block content %}
+<div class="page-header">
+  <div>
+    <h1>Reports &amp; Analytics</h1>
+    <p>Consumption trends and unusual usage across your customer base.</p>
+  </div>
+</div>
+
+<form method="GET" class="filter-bar">
+  <select class="form-control" name="customer_id" style="max-width:280px;" onchange="this.form.submit()">
+    <option value="">All Customers</option>
+    {% for c in customers %}
+    <option value="{{ c.id }}" {{ 'selected' if selected_customer_id == c.id }}>{{ c.name }} ({{ c.consumer_no }})</option>
+    {% endfor %}
+  </select>
+</form>
+
+<div class="card mb-4">
+  <div class="card-header"><h3>Consumption Trend {% if selected_customer_id %}(selected customer){% else %}(all customers){% endif %}</h3></div>
+  <div class="card-body">
+    <div class="chart-box chart-tall">
+      <canvas data-chart="bar" data-chart-json="report-trend-data"></canvas>
+    </div>
+    <script type="application/json" id="report-trend-data">
+      {
+        "labels": [{% for t in trend %}{{ t.ym|tojson }}{% if not loop.last %},{% endif %}{% endfor %}],
+        "values": [{% for t in trend %}{{ t.units or 0 }}{% if not loop.last %},{% endif %}{% endfor %}],
+        "label": "Units (kWh)"
+      }
+    </script>
+  </div>
+</div>
+
+<div class="card">
+  <div class="card-header"><h3>Anomalous Bills</h3><span class="text-xs text-muted">Unusually high consumption vs. past average</span></div>
+  <div class="table-wrap">
+    <table class="data-table">
+      <thead><tr><th>Bill No</th><th>Customer</th><th>Date</th><th>Units</th><th>Amount</th></tr></thead>
+      <tbody>
+        {% for b in anomalies %}
+        <tr>
+          <td class="cell-strong">{{ icon.alerttriangle() }} {{ b.bill_no }}</td>
+          <td>{{ b.customer_name }}</td>
+          <td class="cell-muted">{{ b.bill_date }}</td>
+          <td>{{ "%.1f"|format(b.units_consumed) }}</td>
+          <td class="font-bold">₹{{ "{:,.2f}".format(b.total_amount) }}</td>
+        </tr>
+        {% else %}
+        <tr><td colspan="5" class="table-empty">No anomalies flagged - usage looks normal across the board.</td></tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</div>
+{% endblock %}

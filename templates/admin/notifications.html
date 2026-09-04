@@ -1,0 +1,45 @@
+{% extends "admin/_base.html" %}
+{% import "partials/icons.html" as icon %}
+{% block title %}Notifications{% endblock %}
+{% block active_page %}notifications{% endblock %}
+
+{% block content %}
+<div class="page-header">
+  <div>
+    <h1>Notification Center</h1>
+    <p>Broadcast a message to every customer, or check your own notifications.</p>
+  </div>
+</div>
+
+<div class="card card-pad mb-4">
+  <h3 class="mb-3">Broadcast to All Customers</h3>
+  <form method="POST" action="{{ url_for('admin.notifications') }}">
+    <div class="form-group"><label>Title</label><input class="form-control" name="title" placeholder="e.g. Scheduled Maintenance" required></div>
+    <div class="form-group"><label>Message</label><textarea class="form-control" name="message" placeholder="Write your announcement..." required></textarea></div>
+    <button class="btn btn-primary">{{ icon.send() }} Send to All Customers</button>
+  </form>
+</div>
+
+<div class="card">
+  <div class="card-header"><h3>My Notifications</h3></div>
+  <div style="padding:8px 22px 22px;">
+    {% for n in notifications %}
+    <div class="flex items-start gap-3" style="padding:14px 0;border-bottom:1px solid var(--border);">
+      <div class="stat-icon icon-tone-{{ 'primary' if not n.is_read else 'primary' }}" style="width:34px;height:34px;flex-shrink:0;">{{ icon.bell() }}</div>
+      <div style="flex:1;">
+        <div class="font-bold text-sm">{{ n.title }}</div>
+        <div class="text-sm text-muted">{{ n.message }}</div>
+        <div class="text-xs text-muted mt-1">{{ n.created_at[:16] }}</div>
+      </div>
+      {% if not n.is_read %}
+      <form method="POST" action="{{ url_for('admin.mark_notification_read', notif_id=n.id) }}">
+        <button class="btn btn-sm btn-ghost">Mark read</button>
+      </form>
+      {% endif %}
+    </div>
+    {% else %}
+    <div class="table-empty">{{ icon.bell() }}<div>No notifications yet.</div></div>
+    {% endfor %}
+  </div>
+</div>
+{% endblock %}

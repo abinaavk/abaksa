@@ -1,0 +1,45 @@
+{% import "partials/icons.html" as icon %}
+<header class="topbar">
+  <button class="hamburger-btn" data-hamburger aria-label="Open menu">{{ icon.menu() }}</button>
+  <div class="topbar-title">{{ page_title }}</div>
+  <div class="topbar-spacer"></div>
+
+  <div class="dropdown">
+    <button class="icon-btn" data-dropdown-trigger title="Notifications">
+      {{ icon.bell() }}
+      {% if unread_notification_count %}<span class="dot"></span>{% endif %}
+    </button>
+    <div class="dropdown-panel">
+      <div class="dropdown-title">
+        <span>Notifications</span>
+        <a href="{{ url_for('portal.notifications') if current_user.is_customer else url_for('admin.notifications') }}" class="text-xs" style="color:var(--primary);font-weight:700;">View all</a>
+      </div>
+      {% if topbar_notifications %}
+        {% for n in topbar_notifications %}
+        <div class="dropdown-item {{ 'unread' if not n.is_read }}">
+          <div class="dd-title">{{ n.title }}</div>
+          <div class="dd-msg">{{ n.message }}</div>
+        </div>
+        {% endfor %}
+      {% else %}
+        <div class="dropdown-empty">You're all caught up.</div>
+      {% endif %}
+    </div>
+  </div>
+
+  <div class="dropdown">
+    <button class="avatar" data-dropdown-trigger style="cursor:pointer;border:none;" title="Account">
+      {% if current_user.avatar_url %}<img src="{{ current_user.avatar_url }}" alt="">{% else %}{{ current_user.full_name[0]|upper }}{% endif %}
+    </button>
+    <div class="dropdown-panel" style="width:220px;">
+      <div class="dropdown-title" style="display:block;">
+        <div class="font-bold">{{ current_user.full_name }}</div>
+        <div class="text-xs text-muted">{{ current_user.email or current_user.username }}</div>
+      </div>
+      {% if current_user.is_customer %}
+      <a href="{{ url_for('portal.profile') }}" class="dropdown-item flex items-center gap-2" style="text-decoration:none;">{{ icon.user() }} My Profile</a>
+      {% endif %}
+      <a href="{{ url_for('public.logout') }}" class="dropdown-item flex items-center gap-2" style="text-decoration:none;color:var(--danger);">{{ icon.logout() }} Log Out</a>
+    </div>
+  </div>
+</header>

@@ -1,0 +1,35 @@
+{% extends "admin/_base.html" %}
+{% import "partials/icons.html" as icon %}
+{% block title %}Backup & Export{% endblock %}
+{% block active_page %}backup{% endblock %}
+
+{% block content %}
+<div class="page-header">
+  <div>
+    <h1>Backup &amp; Export</h1>
+    <p>Keep a copy of your data, or pull any table out as a spreadsheet.</p>
+  </div>
+</div>
+
+<div class="grid grid-2">
+  <div class="card card-pad">
+    <div class="stat-icon icon-tone-primary mb-3">{{ icon.database() }}</div>
+    <h3 class="mb-2">Database Backup</h3>
+    <p class="text-sm text-muted mb-3">Creates a timestamped copy of the whole database in the <span class="font-mono">backups/</span> folder on the server.</p>
+    <form method="POST" action="{{ url_for('admin.create_backup') }}">
+      <button class="btn btn-primary">{{ icon.download() }} Create Backup Now</button>
+    </form>
+  </div>
+
+  <div class="card card-pad">
+    <div class="stat-icon icon-tone-success mb-3">{{ icon.filetext() }}</div>
+    <h3 class="mb-2">Export Table to CSV</h3>
+    <p class="text-sm text-muted mb-3">Download any table as a CSV file you can open in Excel or Google Sheets.</p>
+    <div class="flex flex-wrap gap-2">
+      {% for t in ["customers", "bills", "payments", "meter_readings", "complaints", "audit_log", "users", "notifications"] %}
+      <a href="{{ url_for('admin.export_csv', table_name=t) }}" class="btn btn-outline btn-sm">{{ icon.download() }} {{ t }}</a>
+      {% endfor %}
+    </div>
+  </div>
+</div>
+{% endblock %}

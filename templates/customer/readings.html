@@ -1,0 +1,50 @@
+{% extends "customer/_base.html" %}
+{% import "partials/icons.html" as icon %}
+{% block title %}Consumption History{% endblock %}
+{% block active_page %}readings{% endblock %}
+
+{% block content %}
+<div class="page-header">
+  <div>
+    <h1>Consumption History</h1>
+    <p>Every meter reading recorded on your account.</p>
+  </div>
+</div>
+
+<div class="card mb-4">
+  <div class="card-header"><h3>Usage Over Time</h3></div>
+  <div class="card-body">
+    <div class="chart-box">
+      <canvas data-chart="line" data-chart-json="readings-trend-data"></canvas>
+    </div>
+    <script type="application/json" id="readings-trend-data">
+      {
+        "labels": [{% for t in trend %}{{ t.ym|tojson }}{% if not loop.last %},{% endif %}{% endfor %}],
+        "values": [{% for t in trend %}{{ t.units or 0 }}{% if not loop.last %},{% endif %}{% endfor %}],
+        "label": "Units (kWh)"
+      }
+    </script>
+  </div>
+</div>
+
+<div class="card">
+  <div class="table-wrap">
+    <table class="data-table">
+      <thead><tr><th>Date</th><th>Previous</th><th>Current</th><th>Units Consumed</th><th>Billed</th></tr></thead>
+      <tbody>
+        {% for r in readings %}
+        <tr>
+          <td class="cell-muted">{{ r.reading_date }}</td>
+          <td>{{ r.previous_units }}</td>
+          <td>{{ r.current_units }}</td>
+          <td class="font-bold">{{ r.units_consumed }}</td>
+          <td>{% if r.billed %}<span class="badge badge-success">Yes</span>{% else %}<span class="badge badge-muted">No</span>{% endif %}</td>
+        </tr>
+        {% else %}
+        <tr><td colspan="5" class="table-empty">No readings recorded yet.</td></tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</div>
+{% endblock %}
